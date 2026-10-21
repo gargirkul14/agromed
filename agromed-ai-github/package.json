@@ -1,0 +1,28 @@
+{
+  "name": "agromed-ai",
+  "version": "1.0.0",
+  "description": "AgroMed AI - Farmer Health & Safety Assistant",
+  "scripts": {
+    "start": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,green\" \"npm start --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,green\" \"npm start --prefix backend\" \"npm run dev --prefix frontend\"",
+    "build": "cd frontend && npm run build",
+    "prisma:generate": "cd backend && npm run prisma:generate",
+    "prisma:push": "cd backend && npm run prisma:push",
+    "prisma:seed": "cd backend && npm run prisma:seed"
+  },
+  "keywords": [
+    "agromed-ai",
+    "farmer-safety",
+    "occupational-health",
+    "react",
+    "express",
+    "postgresql",
+    "prisma",
+    "gemini"
+  ],
+  "author": "AgroMed AI Team",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  FARMER
+  ADMIN
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password      String
+  phone         String?
+  role          Role           @default(FARMER)
+  isEmailVerified Boolean      @default(false)
+  farmerProfile FarmerProfile?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("users")
+}
+
+model FarmerProfile {
+  id                String             @id @default(uuid())
+  userId            String             @unique
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  age               Int?
+  gender            String?
+  village           String?
+  district          String?
+  state             String?
+  yearsOfFarming    Int?
+  profileCompleted  Boolean            @default(false)
+  workProfile       WorkProfile?
+  healthAssessments HealthAssessment[]
+  chatHistories     ChatHistory[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@map("farmer_profiles")
+}
+
+model WorkProfile {
+  id                  String        @id @default(uuid())
+  farmerId            String        @unique
+  farmer              FarmerProfile @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  cropName            String?
+  farmingType         String?
+  farmSize            String?
+  averageWorkingHours Float?
+  daysWorkedPerWeek   Int?
+  usesPesticides      Boolean       @default(false)
+  usesFertilizers     Boolean       @default(false)
+  commonPesticides    String?       // JSON array string
+  commonFertilizers   String?       // JSON array string
+  ppeUsed             String?       // JSON array string
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@map("work_profiles")
+}
+
+model HealthAssessment {
+  id               String        @id @default(uuid())
+  farmerId         String
+  farmer           FarmerProfile @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  chemicalUsed     String?
+  exposureDuration String
+  activityType     String
+  symptoms         String        // JSON array string
+  ppeUsed          String        // JSON array string
+  riskLevel        String        // LOW, MEDIUM, HIGH
+  safetyScore      Int           // 0 - 100
+  recommendations  String?       // JSON array or text
+  createdAt        DateTime      @default(now())
+
+  @@map("health_assessments")
+}
+
+model ChatHistory {
+  id          String        @id @default(uuid())
+  farmerId    String
+  farmer      FarmerProfile @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  userMessage String
+  aiResponse  String
+  createdAt   DateTime      @default(now())
+
+  @@map("chat_histories")
+}
+
+model SafetyArticle {
+  id        String   @id @default(uuid())
+  title     String
+  category  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("safety_articles")
+}
+
+model ChemicalSafety {
+  id             String   @id @default(uuid())
+  chemicalName   String   @unique
+  precautions    String
+  recommendedPPE String   // JSON array or comma separated
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("chemical_safeties")
+}
+
+model PendingRegistration {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String   // Hashed with bcryptjs
+  phone     String?
+  otpHash   String   // SHA-256 hash of 6-digit OTP
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("pending_registrations")
+}
